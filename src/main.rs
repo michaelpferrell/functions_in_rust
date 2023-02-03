@@ -8,40 +8,52 @@ fn main() {
 
 fn try_adding() {
     println!("* Adding *");
-    let (a, my_status) = try_getting_int_from_user_once("Please enter value A.");
+    
+    let (a, _my_status) = try_getting_int_from_user_once("Please enter value A.");
     println!("Entered for A: {}", a);
-    let (b, my_status) = try_getting_int_from_user_once("Please enter value B.");
+    
+    let (b, _my_status) = try_getting_int_from_user_once("Please enter value B.");
     println!("Entered for B: {}", b);
+    
     let my_sum = add_2_ints(a, b);
     println!("{} + {} = {}", a, b, my_sum);
 }
 
-fn try_getting_int_from_user_once(prompt: &str) -> (i32, NumberParseResult) {
+fn try_getting_int_from_user_once(prompt: &str) -> (i32, UserInputStatus) {
     let mut my_input = String::new();
-
-    println!("{}", prompt);
-    io::stdin()
-        .read_line(&mut my_input)
-        .expect("Failed to read line");
-
-    let mut my_status: NumberParseResult = NumberParseResult::Ok;
-    let my_num: i32 = match my_input.trim().parse()
-    {
-        Ok(num) => num,
+    let my_status = get_line_from_user(prompt, &mut my_input);
+    match my_status {
+        UserInputStatus::Err => return (0, my_status),
+        UserInputStatus::Ok => (),
+    }
+        
+    match my_input.trim().parse() {
+        Ok(num) => {
+            return (num, UserInputStatus::Ok)
+        },
         Err(_) => {
             println!("A number is required!");
-            my_status = NumberParseResult::Err;
-            999
+            return (999, UserInputStatus::Err)
         },
     };
-    return (my_num, my_status);
 }
+
+fn get_line_from_user(prompt: &str, my_input: &mut String) -> UserInputStatus {
+    println!("{}", prompt);
+    io::stdin()
+        // .read_line(&mut my_input)
+        .read_line(my_input)
+        .expect("Failed to read line");
+    return UserInputStatus::Ok;
+}
+
 
 fn add_2_ints(a: i32, b: i32) -> i32 {
     return a+b;
 }
 
-enum NumberParseResult {
+//Todo: add value to Ok
+enum UserInputStatus {
     Ok,
     Err
 }
