@@ -1,17 +1,20 @@
 use std::io;
 
+type UserIntType = i32;
+
 fn main() {
     println!("This program calls different functions.");
     try_adding();
 }
 
 fn try_adding() {
+    println!();
     println!("* Adding *");
     
-    let (a, _my_status) = try_getting_int_from_user_once("Please enter value A.");
+    let a = try_getting_int_from_user("Please enter an integer for A.");
     println!("Entered for A: {}", a);
     
-    let (b, _my_status) = try_getting_int_from_user_once("Please enter value B.");
+    let b = try_getting_int_from_user("Please enter an integer for B.");
     println!("Entered for B: {}", b);
     
     let my_sum = add_2_ints(a, b);
@@ -19,7 +22,17 @@ fn try_adding() {
     
 }
 
-fn try_getting_int_from_user_once(prompt: &str) -> (i32, UserInputStatus) {
+fn try_getting_int_from_user(prompt: &str) -> UserIntType {
+    loop {
+        let (my_int, my_status) = try_getting_int_from_user_once(prompt);
+        match my_status {
+            UserInputStatus::Err => { continue; },
+            UserInputStatus::Ok => { println!(); return my_int; },
+        }
+    }
+}
+
+fn try_getting_int_from_user_once(prompt: &str) -> (UserIntType, UserInputStatus) {
     let mut my_input = String::new();
     let my_status = get_line_from_user(prompt, &mut my_input);
     return match my_status {
@@ -36,19 +49,19 @@ fn get_line_from_user(prompt: &str, my_input: &mut String) -> UserInputStatus {
     return UserInputStatus::Ok;
 }
 
-fn try_parsing_for_int(my_input: &mut String) -> (i32, UserInputStatus) {
+fn try_parsing_for_int(my_input: &mut String) -> (UserIntType, UserInputStatus) {
     match my_input.trim().parse() {
         Ok(num) => {
             return (num, UserInputStatus::Ok)
         },
         Err(_) => {
-            println!("A number is required!");
+            println!("An integer is required!");
             return (999, UserInputStatus::Err)
         },
     }
 }
 
-fn add_2_ints(a: i32, b: i32) -> i32 {
+fn add_2_ints(a: UserIntType, b: UserIntType) -> UserIntType {
     return a+b;
 }
 
